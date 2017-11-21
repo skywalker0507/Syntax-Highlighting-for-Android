@@ -23,7 +23,7 @@
  *
  */
 
-package com.skywalker.languages.common;
+package com.skywalker.syntaxhighlighter;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class Scanner implements Closeable {
+public final class SyntaxScanner {
 
     // Internal buffer used to hold input
     private CharBuffer buf;
@@ -41,7 +41,7 @@ public final class Scanner implements Closeable {
     // Size of internal character buffer
     private static final int BUFFER_SIZE = 1024; // change to 1024;
 
-    // The index into the buffer currently held by the Scanner
+    // The index into the buffer currently held by the SyntaxScanner
     private int position;
 
     // Internal matcher used for finding delimiters
@@ -65,25 +65,25 @@ public final class Scanner implements Closeable {
     // Boolean indicating if this scanner has been closed
     private boolean closed = false;
 
-    private int base=-1024;
+    private int base = 0;
 
     // A holder of the last IOException encountered
     private IOException lastException;
 
 
-    private Scanner(Readable source) {
-        assert source != null : "source should not be null";
+    private SyntaxScanner(Readable source) {
         this.source = source;
         buf = CharBuffer.allocate(BUFFER_SIZE);
         buf.limit(0);
     }
+
     /**
-     * Constructs a new <code>Scanner</code> that produces values scanned
+     * Constructs a new <code>SyntaxScanner</code> that produces values scanned
      * from the specified string.
      *
-     * @param  source A string to scan
+     * @param source A string to scan
      */
-    public Scanner(String source) {
+    public SyntaxScanner(String source) {
         this(new StringReader(source));
     }
 
@@ -96,13 +96,11 @@ public final class Scanner implements Closeable {
         // Prepare to receive data
         int p = buf.position();
         buf.position(buf.limit());
-        int t=buf.position();
         buf.limit(buf.capacity());
 
         int n = 0;
         try {
             n = source.read(buf);
-            base+=BUFFER_SIZE-t;
         } catch (IOException ioe) {
             lastException = ioe;
             n = -1;
@@ -127,6 +125,9 @@ public final class Scanner implements Closeable {
         int offset = savedScannerPosition == -1 ?
                 position : savedScannerPosition;
         buf.position(offset);
+
+        base+=offset;
+
         // Gain space by compacting buffer
         if (offset > 0) {
             buf.compact();
@@ -144,6 +145,7 @@ public final class Scanner implements Closeable {
         position -= offset;
         buf = newBuf;
         matcher.reset(buf);
+
         return true;
     }
 
@@ -158,7 +160,7 @@ public final class Scanner implements Closeable {
     // Returns a match for the specified input pattern.
     private String findPatternInBuffer(Pattern pattern, int horizon) {
         matchValid = false;
-        matcher=pattern.matcher(buf);
+        matcher = pattern.matcher(buf);
         int bufferLimit = buf.limit();
         int horizonLimit = -1;
         int searchLimit = bufferLimit;
@@ -204,30 +206,29 @@ public final class Scanner implements Closeable {
     // Throws if the scanner is closed
     private void ensureOpen() {
         if (closed)
-            throw new IllegalStateException("Scanner closed");
+            throw new IllegalStateException("SyntaxScanner closed");
     }
 
     // Public methods
 
     /**
      * Closes this scanner.
-     *
+     * <p>
      * <p> If this scanner has not yet been closed then if its underlying
-     * {@linkplain java.lang.Readable readable} also implements the {@link
-     * java.io.Closeable} interface then the readable's <tt>close</tt> method
+     * {@linkplain Readable readable} also implements the {@link
+     * Closeable} interface then the readable's <tt>close</tt> method
      * will be invoked.  If this scanner is already closed then invoking this
      * method will have no effect.
-     *
+     * <p>
      * <p>Attempting to perform search operations after a scanner has
      * been closed will result in an {@link IllegalStateException}.
-     *
      */
     public void close() {
         if (closed)
             return;
         if (source instanceof Closeable) {
             try {
-                ((Closeable)source).close();
+                ((Closeable) source).close();
             } catch (IOException ioe) {
                 lastException = ioe;
             }
@@ -239,7 +240,7 @@ public final class Scanner implements Closeable {
 
     /**
      * Returns the <code>IOException</code> last thrown by this
-     * <code>Scanner</code>'s underlying <code>Readable</code>. This method
+     * <code>SyntaxScanner</code>'s underlying <code>Readable</code>. This method
      * returns <code>null</code> if no such exception exists.
      *
      * @return the last exception thrown by this scanner's readable
@@ -254,13 +255,13 @@ public final class Scanner implements Closeable {
      * by this scanner. This method throws <code>IllegalStateException</code>
      * if no match has been performed, or if the last match was
      * not successful.
-     *
-     * <p>The various <code>next</code>methods of <code>Scanner</code>
+     * <p>
+     * <p>The various <code>next</code>methods of <code>SyntaxScanner</code>
      * make a match result available if they complete without throwing an
      * exception.
      *
      * @return a match result for the last match operation
-     * @throws IllegalStateException  If no match result is available
+     * @throws IllegalStateException If no match result is available
      */
     public MatchResult match() {
         if (!matchValid)
@@ -273,36 +274,35 @@ public final class Scanner implements Closeable {
     }
 
 
-
     /**
      * Attempts to find the next occurrence of the specified pattern.
-     *
+     * <p>
      * <p>This method searches through the input up to the specified
      * search horizon, ignoring delimiters. If the pattern is found the
      * scanner advances past the input that matched and returns the string
      * that matched the pattern. If no such pattern is detected then the
      * null is returned and the scanner's position remains unchanged. This
      * method may block waiting for input that matches the pattern.
-     *
+     * <p>
      * <p>A scanner will never search more than <code>horizon</code> code
      * points beyond its current position. Note that a match may be clipped
      * by the horizon; that is, an arbitrary match result may have been
      * different if the horizon had been larger. The scanner treats the
      * horizon as a transparent, non-anchoring bound (see {@link
      * Matcher#useTransparentBounds} and {@link Matcher#useAnchoringBounds}).
-     *
+     * <p>
      * <p>If horizon is <code>0</code>, then the horizon is ignored and
      * this method continues to search through the input looking for the
      * specified pattern without bound. In this case it may buffer all of
      * the input searching for the pattern.
-     *
+     * <p>
      * <p>If horizon is negative, then an IllegalArgumentException is
      * thrown.
      *
      * @param pattern the pattern to scan for
      * @param horizon the search horizon
      * @return the text that matched the specified pattern
-     * @throws IllegalStateException if this scanner is closed
+     * @throws IllegalStateException    if this scanner is closed
      * @throws IllegalArgumentException if horizon is negative
      */
     public String findWithinHorizon(Pattern pattern, int horizon) {

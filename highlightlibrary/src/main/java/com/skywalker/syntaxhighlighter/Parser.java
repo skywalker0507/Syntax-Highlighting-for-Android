@@ -1,14 +1,18 @@
-package com.skywalker;
+package com.skywalker.syntaxhighlighter;
 
-import com.skywalker.languages.common.*;
 
-import java.io.FileNotFoundException;
+import com.skywalker.syntaxhighlighter.languages.common.Mode;
+import com.skywalker.syntaxhighlighter.languages.common.RegExpRule;
+import com.skywalker.syntaxhighlighter.languages.common.RegexMatchResult;
+import com.skywalker.syntaxhighlighter.languages.common.RegexPairRule;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
 
 public class Parser {
+
     private Mode mLanguage;
     private List<RegexMatchResult> mMatchResults = new ArrayList<>();
 
@@ -16,10 +20,10 @@ public class Parser {
         this.mLanguage = language;
     }
 
-    public void Pase(String content) throws FileNotFoundException {
+    public void pase(String content){
 
         long startTime = System.currentTimeMillis();
-        Scanner scanner = new Scanner(content);
+        SyntaxScanner scanner = new SyntaxScanner(content);
         while (scanner.findWithinHorizon(mLanguage.getToken(), 0) != null) {
             for (int i = 1; i <= scanner.match().groupCount(); i++) {
                 if (scanner.match().start(i) != -1) {
@@ -66,19 +70,6 @@ public class Parser {
 
 
         }
-        /*for (RegexMatchResult r : mMatchResults) {
-            String substring = content.substring(index, r.getStart());
-            for (RegExpRule rule : mLanguage.getRegExpRuleList()) {
-                Matcher matcher = rule.getPattern().matcher(substring);
-                while (matcher.find()) {
-                    RegexMatchResult result = new RegexMatchResult(rule.getKey());
-                    result.setStart(index+matcher.start());
-                    result.setEnd(index+matcher.end());
-                    list.add(result);
-                }
-            }
-            index = r.getEnd()+1;
-        }*/
 
         mMatchResults.addAll(list);
 
@@ -87,20 +78,6 @@ public class Parser {
         long totalTime = endTime - startTime;
         System.out.println("totalTime " + totalTime);
 
-
-        /*startTime = System.currentTimeMillis();
-        for (RegExpRule rule : mLanguage.getRegExpRuleList()) {
-            RegexMatchResult result = new RegexMatchResult(rule.getKey());
-            Matcher matcher = rule.getPattern().matcher(content);
-            while (matcher.find()) {
-                result.setStart(matcher.start());
-                result.setEnd(matcher.end());
-                mPairMatchResults.add(result);
-            }
-        }
-        endTime   = System.currentTimeMillis();
-        totalTime = endTime - startTime;
-        System.out.println(totalTime);*/
     }
 
     public List<RegexMatchResult> getMatchResults() {

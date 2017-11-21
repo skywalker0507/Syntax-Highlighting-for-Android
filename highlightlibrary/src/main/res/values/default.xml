@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="default_text">#F8F8F2</color>
+    <color name="default_background">#282828</color>
+
+    <color name="default_string">#E6DB74</color>
+    <color name="default_comment">#75715E</color>
+    <color name="default_type">#66D9EF</color>
+    <color name="default_constant">#AE81FF</color>
+    <color name="default_number">#AE81FF</color>
+    <color name="default_statement">#F92672</color>
+
+
+</resources>

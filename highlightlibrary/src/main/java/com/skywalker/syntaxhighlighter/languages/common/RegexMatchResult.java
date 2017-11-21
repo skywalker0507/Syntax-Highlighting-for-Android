@@ -1,12 +1,12 @@
-package com.skywalker.languages.common;
+package com.skywalker.syntaxhighlighter.languages.common;
 
 public class RegexMatchResult {
-    private String mKey;
+    private Integer mKey;
     private int mStart;
     private int mEnd;
 
-    public RegexMatchResult(String key){
-        this.mKey=key;
+    public RegexMatchResult(Integer key) {
+        this.mKey = key;
     }
 
     public void setStart(int start) {
@@ -17,7 +17,7 @@ public class RegexMatchResult {
         mEnd = end;
     }
 
-    public String getKey() {
+    public Integer getKey() {
         return mKey;
     }
 

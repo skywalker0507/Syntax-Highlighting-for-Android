@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="atom_dark_text">#a9b7c6</color>
+    <color name="atom_dark_background">#282b2e</color>
+
+    <color name="atom_dark_string">#A8FF60</color>
+    <color name="atom_dark_comment">#7C7C7C</color>
+    <color name="atom_dark_type">#C6C5FE</color>
+    <color name="atom_dark_number">#FF73FD</color>
+    <color name="atom_dark_statement">#96CBFE</color>
+    <color name="atom_dark_constant">#FF73FD</color>
+
+</resources>

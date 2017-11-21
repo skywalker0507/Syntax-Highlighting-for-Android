@@ -1,17 +1,17 @@
-package com.skywalker.languages.common;
+package com.skywalker.syntaxhighlighter.languages.common;
 
 import java.util.regex.Pattern;
 
 public class RegExpRule {
-    private String mKey;
+    private Integer mKey;
     private Pattern mPattern;
 
-    public RegExpRule(String key,Pattern pattern){
-        this.mKey=key;
-        this.mPattern=pattern;
+    public RegExpRule(Integer key, Pattern pattern) {
+        this.mKey = key;
+        this.mPattern = pattern;
     }
 
-    public String getKey() {
+    public Integer getKey() {
         return mKey;
     }
 
