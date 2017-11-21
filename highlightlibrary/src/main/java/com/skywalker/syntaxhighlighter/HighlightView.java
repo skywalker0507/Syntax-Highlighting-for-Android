@@ -26,8 +26,8 @@ import com.skywalker.syntaxhighlighter.themes.Theme;
  * data: 2017/11/20               *
  *******************************/
 
-public class HighlightView extends AppCompatEditText {
-    private Theme mTheme;
+public class HighlightView extends AppCompatEditText{
+
     private String mContent;
     private SpannableStringBuilder mBuilder;
 
@@ -39,7 +39,48 @@ public class HighlightView extends AppCompatEditText {
 
     private float zoomLimit = 3.0f;
     private Paint paint;
+    private boolean mShowLineNumber;
+    private boolean mWrapping;
+    private boolean mZoom;
+    private boolean mEditable;
+    private Theme mTheme;
 
+    public static class Builder{
+
+        private boolean mShowLineNumber;
+        private boolean mWrapping;
+        private boolean mZoom;
+        private boolean mEditable;
+        private Theme mTheme;
+        public Builder(String content){
+
+        }
+
+        public Builder showLineNumber(boolean isEnable){
+            return this;
+        }
+        public Builder setTheme(Theme theme){
+            this.mTheme=theme;
+            return this;
+        }
+
+        public Builder textWrapping(boolean wrapping){
+            this.mWrapping=wrapping;
+            return this;
+        }
+
+        public Builder enableZoom(boolean isEnable){
+            this.mZoom=isEnable;
+            return this;
+        }
+
+        public Builder enableEdit(boolean isEnable){
+            this.mEditable=isEnable;
+            return this;
+        }
+
+
+    }
 
     public HighlightView(Context context) {
         this(context, null);
@@ -55,10 +96,10 @@ public class HighlightView extends AppCompatEditText {
         initialize();
     }
 
-    public void setTheme(Theme theme) {
-        this.mTheme = theme;
-        setBackgroundColor(theme.getColor(Mode.KEY_BACKGROUND));
-        setTextColor(theme.getColor(Mode.KEY_TEXT));
+    public void setHighlightBuilder(Builder builder){
+        this.mTheme=builder.mTheme;
+        this.mEditable=builder.mEditable;
+        this.mShowLineNumber=builder.mShowLineNumber;
     }
 
     public void setContent(String content) {
@@ -67,6 +108,9 @@ public class HighlightView extends AppCompatEditText {
     }
 
     public void render() {
+
+        setBackgroundColor(mTheme.getColor(Mode.KEY_BACKGROUND));
+        setTextColor(mTheme.getColor(Mode.KEY_TEXT));
         Parser parser = new Parser(new JavaMode());
         parser.pase(mContent);
         for (RegexMatchResult result : parser.getMatchResults()) {

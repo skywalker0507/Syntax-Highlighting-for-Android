@@ -1,6 +1,7 @@
 package com.skywalker.syntaxhighlighter;
 
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -29,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
             inputStream.close();
 
             long startTime = System.currentTimeMillis();
-            mHighlightView.setContent(new String(buffer));
-            mHighlightView.setTheme(new DefaultTheme(this));
+            HighlightView.Builder builder=new HighlightView.Builder().enableEdit();
+
             mHighlightView.render();
             long endTime = System.currentTimeMillis();
             long totalTime = endTime - startTime;
