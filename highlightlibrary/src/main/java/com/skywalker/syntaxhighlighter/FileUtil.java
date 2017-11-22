@@ -11,8 +11,6 @@ import java.io.IOException;
  *******************************/
 
 public class FileUtil {
-    private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
-    private static final int BUFFER_SIZE = 8192;
 
     public static byte[] readBytes(String filePath) throws IOException {
         return readBytes(new FileInputStream(filePath));

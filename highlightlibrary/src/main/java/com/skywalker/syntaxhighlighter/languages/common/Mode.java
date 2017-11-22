@@ -6,8 +6,10 @@ import java.util.regex.Pattern;
 
 public abstract class Mode {
 
-    public static final int KEY_TEXT=0;
-    public static final int KEY_BACKGROUND=1;
+    public static final int KEY_TEXT = 0;
+    public static final int KEY_BACKGROUND = 1;
+    public static final int LINE_NUMBER_BACKGROUND = 2;
+    public static final int LINE_NUMBER_FOREROUND = 3;
 
     public static final int KEY_STRING = 11;
     public static final int KEY_COMMENT = 12;
@@ -20,6 +22,7 @@ public abstract class Mode {
     protected String mSymbol;
     protected List<RegExpRule> mRegExpRuleList = new ArrayList<>();
     protected List<RegexPairRule> mRegexPairList = new ArrayList<>();
+
 
     public Pattern getToken() {
         return Pattern.compile(mToken);
@@ -35,5 +38,20 @@ public abstract class Mode {
 
     public List<RegexPairRule> getRegexPairList() {
         return mRegexPairList;
+    }
+
+    protected String combinePatterns(String... patterns) {
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < patterns.length; i++) {
+            builder.append("(").append(patterns[i]);
+            if (i == patterns.length - 1) {
+                builder.append(")");
+            } else {
+                builder.append(")|");
+            }
+
+        }
+        return builder.toString();
     }
 }

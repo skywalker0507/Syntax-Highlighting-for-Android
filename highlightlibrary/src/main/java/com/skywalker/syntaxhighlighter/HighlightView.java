@@ -10,6 +10,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
@@ -18,6 +19,7 @@ import android.view.ScaleGestureDetector;
 import com.skywalker.syntaxhighlighter.languages.JavaMode;
 import com.skywalker.syntaxhighlighter.languages.common.Mode;
 import com.skywalker.syntaxhighlighter.languages.common.RegexMatchResult;
+import com.skywalker.syntaxhighlighter.themes.DefaultTheme;
 import com.skywalker.syntaxhighlighter.themes.Theme;
 
 /*******************************
@@ -38,12 +40,18 @@ public class HighlightView extends AppCompatEditText{
     private float defaultSize;
 
     private float zoomLimit = 3.0f;
-    private Paint paint;
-    private boolean mShowLineNumber;
-    private boolean mWrapping;
-    private boolean mZoom;
-    private boolean mEditable;
+    private boolean mShowLineNumber=false;
+    private boolean mWrapping=false;
+    private boolean mZoom=false;
+    private boolean mEditable=false;
+    private float mZoomUpperLimit;
+    private float mZoomLowerLimit;
     private Theme mTheme;
+
+
+    private Paint mPaint;
+    private int mLineNumberWidth;
+    private int mNumberBarWidth;
 
     public static class Builder{
 
@@ -52,13 +60,14 @@ public class HighlightView extends AppCompatEditText{
         private boolean mZoom;
         private boolean mEditable;
         private Theme mTheme;
-        public Builder(String content){
 
-        }
+        private float mZoomUpperLimit;
+        private float mZoomLowerLimit;
 
         public Builder showLineNumber(boolean isEnable){
             return this;
         }
+
         public Builder setTheme(Theme theme){
             this.mTheme=theme;
             return this;
@@ -71,6 +80,16 @@ public class HighlightView extends AppCompatEditText{
 
         public Builder enableZoom(boolean isEnable){
             this.mZoom=isEnable;
+            return this;
+        }
+
+        public Builder setZoomUpperLimit(float limit){
+            this.mZoomUpperLimit=limit;
+            return this;
+        }
+
+        public Builder setZoomLowerLimit(float limit){
+            this.mZoomLowerLimit=limit;
             return this;
         }
 
@@ -96,10 +115,24 @@ public class HighlightView extends AppCompatEditText{
         initialize();
     }
 
+    private void initialize() {
+        defaultSize = getTextSize();
+        mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
+
+        mPaint = new Paint();
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setColor(Color.RED);
+        mPaint.setStrokeWidth(10);
+    }
+
     public void setHighlightBuilder(Builder builder){
         this.mTheme=builder.mTheme;
         this.mEditable=builder.mEditable;
         this.mShowLineNumber=builder.mShowLineNumber;
+        this.mZoomUpperLimit=builder.mZoomUpperLimit;
+        this.mZoomLowerLimit=builder.mZoomLowerLimit;
+        this.mWrapping=builder.mWrapping;
+        this.mZoom=builder.mZoom;
     }
 
     public void setContent(String content) {
@@ -108,11 +141,20 @@ public class HighlightView extends AppCompatEditText{
     }
 
     public void render() {
+        if (mTheme==null){
+            mTheme=new DefaultTheme(getContext());
+        }
+        if (mContent==null){
+            throw new NullPointerException("文本内容为空");
+        }
 
+        if (!mWrapping){
+            setHorizontallyScrolling(true);
+        }
         setBackgroundColor(mTheme.getColor(Mode.KEY_BACKGROUND));
         setTextColor(mTheme.getColor(Mode.KEY_TEXT));
         Parser parser = new Parser(new JavaMode());
-        parser.pase(mContent);
+        parser.parse(mContent);
         for (RegexMatchResult result : parser.getMatchResults()) {
 
             mBuilder.setSpan(new ForegroundColorSpan(
@@ -126,32 +168,23 @@ public class HighlightView extends AppCompatEditText{
     }
 
 
-    private void initialize() {
-        defaultSize = getTextSize();
-        mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
 
-        /*paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(20);*/
-        paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.RED);
-    }
 
-    /***
-     * @param zoomLimit
-     * Default value is 3, 3 means text can zoom 3 times the default size
-     */
-
-    public void setZoomLimit(float zoomLimit) {
-        this.zoomLimit = zoomLimit;
-    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+        if (mShowLineNumber){
+            String strCount = String.valueOf(getLineCount());
+            mLineNumberWidth= (int) getPaint().measureText(strCount);
+            setPadding(mLineNumberWidth+20, 0, 0, 0);
+            mNumberBarWidth=mLineNumberWidth+12;
+        }
+
+
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
+
 
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev) {
@@ -162,17 +195,16 @@ public class HighlightView extends AppCompatEditText{
 
     @Override
     protected void onDraw(Canvas canvas) {
-        String strCount = String.valueOf(getLineCount());
-        int width = (int) (getPaint().measureText(strCount) * 1.5);
         int baseline = getBaseline();
-        setPadding(width, 0, 0, 0);
 
-        paint.setStrokeWidth(width * 1.5f);
-        canvas.drawLine(0, 0, 0, getLineHeight() * getLineCount(), paint);
+        if (mShowLineNumber){
 
-        for (int i = 0; i < getLineCount(); i++) {
-            canvas.drawText("" + (i + 1), 0, baseline, getPaint());
-            baseline += getLineHeight();
+            canvas.drawRect(0, 0, mNumberBarWidth, getLineHeight() * getLineCount(), mPaint);
+
+            for (int i = 1; i <= getLineCount(); i++) {
+                canvas.drawText(Integer.toString(i), 5, baseline, getPaint());
+                baseline += getLineHeight();
+            }
         }
         super.onDraw(canvas);
 
@@ -180,16 +212,16 @@ public class HighlightView extends AppCompatEditText{
         /*String strCount = String.valueOf(getLineCount());
 
         float[] symbolWidths = new float[strCount.length()];
-        paint.getTextWidths(strCount, symbolWidths);
+        mPaint.getTextWidths(strCount, symbolWidths);
 
         float strokeWidth = 0;
         for (float width : symbolWidths)
             strokeWidth += width;
         strokeWidth = strokeWidth *2*//*I dnt knw y*//* + strokeWidth;
-        paint.setStrokeWidth(strokeWidth);
+        mPaint.setStrokeWidth(strokeWidth);
         setPadding((int)strokeWidth / 2, 0, 0, 0); // text padding
 
-        canvas.drawLine(rect.left, getLineHeight() * getLineCount(), rect.right, rect.top, paint);
+        canvas.drawLine(rect.left, getLineHeight() * getLineCount(), rect.right, rect.top, mPaint);
 
         super.onDraw(canvas);*/
     }
@@ -209,5 +241,15 @@ public class HighlightView extends AppCompatEditText{
             Log.e(TAG, String.valueOf(mScaleFactor));
             return true;
         }
+    }
+
+    private int dp2px(int dp) {
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public int px2dp(int px) {
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 }

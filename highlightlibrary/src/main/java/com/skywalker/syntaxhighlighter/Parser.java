@@ -20,7 +20,7 @@ public class Parser {
         this.mLanguage = language;
     }
 
-    public void pase(String content){
+    public void parse(String content){
 
         long startTime = System.currentTimeMillis();
         SyntaxScanner scanner = new SyntaxScanner(content);

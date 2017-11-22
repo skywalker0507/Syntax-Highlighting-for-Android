@@ -15,13 +15,7 @@ import com.skywalker.syntaxhighlighter.languages.common.Mode;
 public class AtomDarkTheme extends Theme {
 
     public AtomDarkTheme(Context context){
-        //mColors.put(Mode.KEY_BACKGROUND, R.color.atom_dark_background);
-        /*mColors.put(Mode.KEY_COMMENT, Color.CYAN);
-        mColors.put(Mode.KEY_CONSTANT,Color.BLUE);
-        mColors.put(Mode.KEY_NUMBER,Color.RED);
-        mColors.put(Mode.KEY_STATEMENT,Color.YELLOW);
-        mColors.put(Mode.KEY_STRING,Color.MAGENTA);
-        mColors.put(Mode.KEY_TYPES,Color.LTGRAY);*/
+
         mColors.put(Mode.KEY_TEXT,ContextCompat.getColor(context,R.color.atom_dark_text));
         mColors.put(Mode.KEY_BACKGROUND, ContextCompat.getColor(context,R.color.atom_dark_background));
         mColors.put(Mode.KEY_COMMENT, ContextCompat.getColor(context,R.color.atom_dark_comment));

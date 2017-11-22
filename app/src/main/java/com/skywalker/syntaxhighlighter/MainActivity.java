@@ -1,7 +1,6 @@
 package com.skywalker.syntaxhighlighter;
 
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -22,16 +21,17 @@ public class MainActivity extends AppCompatActivity {
         mHighlightView.setMovementMethod(ScrollingMovementMethod.getInstance());
         //mHighlightView.setHorizontallyScrolling(true);
         try {
-            //String file="SyntaxHighlighterParser.java";
-            String file="ChartComputator.java";
+            String file="SyntaxHighlighterParser.java";
+            //String file="ChartComputator.java";
             InputStream inputStream=getAssets().open(file);
             byte[] buffer = new byte[inputStream.available()];
             inputStream.read(buffer);
             inputStream.close();
 
             long startTime = System.currentTimeMillis();
-            HighlightView.Builder builder=new HighlightView.Builder().enableEdit();
-
+            HighlightView.Builder builder=new HighlightView.Builder().enableEdit(false).setTheme(new DefaultTheme(this));
+            mHighlightView.setHighlightBuilder(builder);
+            mHighlightView.setContent(new String(buffer));
             mHighlightView.render();
             long endTime = System.currentTimeMillis();
             long totalTime = endTime - startTime;

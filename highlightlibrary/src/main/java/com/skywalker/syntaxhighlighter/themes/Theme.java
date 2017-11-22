@@ -10,10 +10,7 @@ import android.util.SparseIntArray;
  *******************************/
 
 public class Theme {
-    /*protected Context mContext;
-    public Theme(Context context){
-        this.mContext=context;
-    }*/
+
     protected SparseIntArray mColors=new SparseIntArray();
 
     public @ColorInt int getColor(int key){
