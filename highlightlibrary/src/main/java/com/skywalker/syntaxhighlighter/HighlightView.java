@@ -10,7 +10,6 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
@@ -40,7 +39,7 @@ public class HighlightView extends AppCompatEditText{
     private float defaultSize;
 
     private float zoomLimit = 3.0f;
-    private boolean mShowLineNumber=false;
+    private boolean mShowLineNumber=true;
     private boolean mWrapping=false;
     private boolean mZoom=false;
     private boolean mEditable=false;
@@ -55,16 +54,17 @@ public class HighlightView extends AppCompatEditText{
 
     public static class Builder{
 
-        private boolean mShowLineNumber;
-        private boolean mWrapping;
-        private boolean mZoom;
-        private boolean mEditable;
+        private boolean mShowLineNumber=false;
+        private boolean mWrapping=false;
+        private boolean mZoom=false;
+        private boolean mEditable=false;
         private Theme mTheme;
 
         private float mZoomUpperLimit;
         private float mZoomLowerLimit;
 
-        public Builder showLineNumber(boolean isEnable){
+        public Builder showLineNumber(boolean showLineNumber){
+            mShowLineNumber=showLineNumber;
             return this;
         }
 
@@ -175,9 +175,13 @@ public class HighlightView extends AppCompatEditText{
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
         if (mShowLineNumber){
+            //获取TextView的行数
             String strCount = String.valueOf(getLineCount());
+            //计算最大行号的宽度
             mLineNumberWidth= (int) getPaint().measureText(strCount);
+
             setPadding(mLineNumberWidth+20, 0, 0, 0);
+            //设置行号显示部分的宽度
             mNumberBarWidth=mLineNumberWidth+12;
         }
 
@@ -189,6 +193,7 @@ public class HighlightView extends AppCompatEditText{
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev) {
         super.onTouchEvent(ev);
+        //设置文本缩放
         mScaleDetector.onTouchEvent(ev);
         return true;
     }
@@ -198,9 +203,9 @@ public class HighlightView extends AppCompatEditText{
         int baseline = getBaseline();
 
         if (mShowLineNumber){
-
+            //画行号的背景
             canvas.drawRect(0, 0, mNumberBarWidth, getLineHeight() * getLineCount(), mPaint);
-
+            //绘制行号数
             for (int i = 1; i <= getLineCount(); i++) {
                 canvas.drawText(Integer.toString(i), 5, baseline, getPaint());
                 baseline += getLineHeight();
@@ -243,13 +248,4 @@ public class HighlightView extends AppCompatEditText{
         }
     }
 
-    private int dp2px(int dp) {
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
-
-    public int px2dp(int px) {
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
 }

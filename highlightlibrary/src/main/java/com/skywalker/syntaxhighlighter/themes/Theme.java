@@ -11,9 +11,10 @@ import android.util.SparseIntArray;
 
 public class Theme {
 
-    protected SparseIntArray mColors=new SparseIntArray();
+    protected SparseIntArray mColors = new SparseIntArray();
 
-    public @ColorInt int getColor(int key){
+    public @ColorInt
+    int getColor(int key) {
         return mColors.get(key);
     }
 }

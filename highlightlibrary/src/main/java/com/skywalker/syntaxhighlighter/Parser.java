@@ -54,6 +54,7 @@ public class Parser {
                     index = r.getEnd() + 1;
                     continue;
                 }
+
                 substring = content.substring(index, r.getStart());
                 index = r.getEnd() + 1;
             }

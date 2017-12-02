@@ -13,29 +13,33 @@ import java.io.InputStream;
 public class MainActivity extends AppCompatActivity {
 
     private HighlightView mHighlightView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mHighlightView=findViewById(R.id.HighlightView);
+        mHighlightView = findViewById(R.id.HighlightView);
         mHighlightView.setMovementMethod(ScrollingMovementMethod.getInstance());
-        //mHighlightView.setHorizontallyScrolling(true);
         try {
-            String file="SyntaxHighlighterParser.java";
-            //String file="ChartComputator.java";
-            InputStream inputStream=getAssets().open(file);
+            //String file="SyntaxHighlighterParser.java";
+            String file = "ChartComputator.java";
+            InputStream inputStream = getAssets().open(file);
             byte[] buffer = new byte[inputStream.available()];
             inputStream.read(buffer);
             inputStream.close();
 
             long startTime = System.currentTimeMillis();
-            HighlightView.Builder builder=new HighlightView.Builder().enableEdit(false).setTheme(new DefaultTheme(this));
+            HighlightView.Builder builder = new HighlightView.Builder()
+                    .enableEdit(false)
+                    .setTheme(new DefaultTheme(this))
+                    .showLineNumber(true)
+                    .textWrapping(false);
             mHighlightView.setHighlightBuilder(builder);
             mHighlightView.setContent(new String(buffer));
             mHighlightView.render();
             long endTime = System.currentTimeMillis();
             long totalTime = endTime - startTime;
-            Log.e("totalTime " , ""+totalTime);
+            Log.e("totalTime ", "" + totalTime);
         } catch (IOException e) {
             e.printStackTrace();
         }
