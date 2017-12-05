@@ -11,8 +11,7 @@ import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    private HighlightView mHighlightView1;
-    private HighlightView mHighlightView2;
+    private HighlightView mHighlightView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,30 +27,18 @@ public class MainActivity extends AppCompatActivity {
             inputStream.close();
 
             //
-            mHighlightView1 = findViewById(R.id.HighlightView1);
-            mHighlightView1.setMovementMethod(ScrollingMovementMethod.getInstance());
+            mHighlightView = findViewById(R.id.HighlightView);
+            mHighlightView.setMovementMethod(ScrollingMovementMethod.getInstance());
             HighlightView.Builder builder1 = new HighlightView.Builder()
                     .enableEdit(false)
                     .setTheme(new DefaultTheme(this))
                     .showLineNumber(true)
                     .enableZoom(false)
                     .textWrapping(false);
-            mHighlightView1.setHighlightBuilder(builder1);
-            mHighlightView1.setContent(new String(buffer));
-            mHighlightView1.render();
+            mHighlightView.setHighlightBuilder(builder1);
+            mHighlightView.setContent(new String(buffer));
+            mHighlightView.render();
 
-
-            mHighlightView2 = findViewById(R.id.HighlightView2);
-            mHighlightView2.setMovementMethod(ScrollingMovementMethod.getInstance());
-            HighlightView.Builder builder = new HighlightView.Builder()
-                    .enableEdit(false)
-                    .setTheme(new DefaultTheme(this))
-                    .showLineNumber(true)
-                    .enableZoom(false)
-                    .textWrapping(false);
-            mHighlightView2.setHighlightBuilder(builder);
-            mHighlightView2.setContent(new String(buffer));
-            mHighlightView2.render();
 
         } catch (IOException e) {
             e.printStackTrace();

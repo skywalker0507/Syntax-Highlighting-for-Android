@@ -7,46 +7,37 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.skywalker.syntaxhighlighter.MainActivity">
-    <!--<ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        >
-        <HorizontalScrollView
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:orientation="horizontal">
+        <CheckBox
+            android:id="@+id/checkbox_linenumber"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <com.skywalker.syntaxhighlighter.HighlightView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/HighlightView"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
-        </HorizontalScrollView>
+            android:layout_height="wrap_content"
+            android:text="行号"/>
 
-    </ScrollView>-->
+        <CheckBox
+            android:id="@+id/checkbox_zoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="缩放"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="123"/>
+        <CheckBox
+            android:id="@+id/checkbox_wrapping"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自动换行"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="重新加载"/>
+    </LinearLayout>
+
     <com.skywalker.syntaxhighlighter.HighlightView
-        android:id="@+id/HighlightView1"
+        android:id="@+id/HighlightView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="123"/>
-    <com.skywalker.syntaxhighlighter.HighlightView
-        android:id="@+id/HighlightView2"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        />
-
 </LinearLayout>
