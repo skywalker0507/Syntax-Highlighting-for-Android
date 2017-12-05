@@ -27,7 +27,7 @@ import com.skywalker.syntaxhighlighter.themes.Theme;
  * data: 2017/11/20               *
  *******************************/
 
-public class HighlightView extends AppCompatEditText{
+public class HighlightView extends AppCompatEditText {
 
     private String mContent;
     private SpannableStringBuilder mBuilder;
@@ -39,62 +39,63 @@ public class HighlightView extends AppCompatEditText{
     private float defaultSize;
 
     private float zoomLimit = 3.0f;
-    private boolean mShowLineNumber=true;
-    private boolean mWrapping=false;
-    private boolean mZoom=false;
-    private boolean mEditable=false;
+    private boolean mShowLineNumber;
+    private boolean mWrapping;
+    private boolean mZoom;
+    private boolean mEditable;
     private float mZoomUpperLimit;
     private float mZoomLowerLimit;
     private Theme mTheme;
 
 
     private Paint mPaint;
+    private Paint mNumberPaint;
     private int mLineNumberWidth;
     private int mNumberBarWidth;
 
-    public static class Builder{
+    public static class Builder {
 
-        private boolean mShowLineNumber=false;
-        private boolean mWrapping=false;
-        private boolean mZoom=false;
-        private boolean mEditable=false;
+        private boolean mShowLineNumber = false;
+        private boolean mWrapping = false;
+        private boolean mZoom = false;
+        private boolean mEditable = false;
         private Theme mTheme;
 
         private float mZoomUpperLimit;
         private float mZoomLowerLimit;
 
-        public Builder showLineNumber(boolean showLineNumber){
-            mShowLineNumber=showLineNumber;
+        public Builder showLineNumber(boolean showLineNumber) {
+            mShowLineNumber = showLineNumber;
             return this;
         }
 
-        public Builder setTheme(Theme theme){
-            this.mTheme=theme;
+        public Builder setTheme(Theme theme) {
+            this.mTheme = theme;
             return this;
         }
 
-        public Builder textWrapping(boolean wrapping){
-            this.mWrapping=wrapping;
+        public Builder textWrapping(boolean wrapping) {
+            this.mWrapping = wrapping;
             return this;
         }
 
-        public Builder enableZoom(boolean isEnable){
-            this.mZoom=isEnable;
+        public Builder enableZoom(boolean isEnable) {
+            this.mZoom = isEnable;
             return this;
         }
 
-        public Builder setZoomUpperLimit(float limit){
-            this.mZoomUpperLimit=limit;
+        public Builder setZoomUpperLimit(float limit) {
+            this.mZoomUpperLimit = limit;
             return this;
         }
 
-        public Builder setZoomLowerLimit(float limit){
-            this.mZoomLowerLimit=limit;
+        public Builder setZoomLowerLimit(float limit) {
+            this.mZoomLowerLimit = limit;
             return this;
         }
 
-        public Builder enableEdit(boolean isEnable){
-            this.mEditable=isEnable;
+        public Builder enableEdit(boolean isEnable) {
+            this.mEditable = isEnable;
             return this;
         }
 
@@ -112,27 +113,46 @@ public class HighlightView extends AppCompatEditText{
     public HighlightView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        initialize();
+
     }
 
     private void initialize() {
         defaultSize = getTextSize();
-        mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
+        if (mZoom) {
+            mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
+        }
 
-        mPaint = new Paint();
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(Color.RED);
-        mPaint.setStrokeWidth(10);
+
+        if (mShowLineNumber) {
+            mPaint = new Paint();
+            mPaint.setStyle(Paint.Style.FILL);
+            mPaint.setColor(Color.GRAY);
+            mPaint.setStrokeWidth(10);
+
+            mNumberPaint=new Paint();
+            mNumberPaint.setStyle(Paint.Style.FILL);
+            mNumberPaint.setColor(Color.WHITE);
+            mNumberPaint.setStrokeWidth(getPaint().getStrokeWidth());
+            mNumberPaint.setTextSize(getPaint().getTextSize());
+        }
+
+        if (!mEditable) {
+            setFocusable(false);
+        }
+
     }
 
-    public void setHighlightBuilder(Builder builder){
-        this.mTheme=builder.mTheme;
-        this.mEditable=builder.mEditable;
-        this.mShowLineNumber=builder.mShowLineNumber;
-        this.mZoomUpperLimit=builder.mZoomUpperLimit;
-        this.mZoomLowerLimit=builder.mZoomLowerLimit;
-        this.mWrapping=builder.mWrapping;
-        this.mZoom=builder.mZoom;
+    public void setHighlightBuilder(Builder builder) {
+        this.mTheme = builder.mTheme;
+        this.mEditable = builder.mEditable;
+        this.mShowLineNumber = builder.mShowLineNumber;
+        this.mZoomUpperLimit = builder.mZoomUpperLimit;
+        this.mZoomLowerLimit = builder.mZoomLowerLimit;
+        this.mWrapping = builder.mWrapping;
+        this.mZoom = builder.mZoom;
+
+        initialize();
+
     }
 
     public void setContent(String content) {
@@ -141,16 +161,18 @@ public class HighlightView extends AppCompatEditText{
     }
 
     public void render() {
-        if (mTheme==null){
-            mTheme=new DefaultTheme(getContext());
+        if (mTheme == null) {
+            mTheme = new DefaultTheme(getContext());
         }
-        if (mContent==null){
+        if (mContent == null) {
             throw new NullPointerException("文本内容为空");
         }
 
-        if (!mWrapping){
+        if (!mWrapping) {
             setHorizontallyScrolling(true);
+
         }
+
         setBackgroundColor(mTheme.getColor(Mode.KEY_BACKGROUND));
         setTextColor(mTheme.getColor(Mode.KEY_TEXT));
         Parser parser = new Parser(new JavaMode());
@@ -158,7 +180,7 @@ public class HighlightView extends AppCompatEditText{
         for (RegexMatchResult result : parser.getMatchResults()) {
 
             mBuilder.setSpan(new ForegroundColorSpan(
-                    mTheme.getColor(result.getKey())),
+                            mTheme.getColor(result.getKey())),
                     result.getStart(),
                     result.getEnd(),
                     Spannable.SPAN_INCLUSIVE_INCLUSIVE);
@@ -168,21 +190,17 @@ public class HighlightView extends AppCompatEditText{
     }
 
 
-
-
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-        if (mShowLineNumber){
+        if (mShowLineNumber) {
             //获取TextView的行数
             String strCount = String.valueOf(getLineCount());
             //计算最大行号的宽度
-            mLineNumberWidth= (int) getPaint().measureText(strCount);
+            mLineNumberWidth = (int) getPaint().measureText(strCount);
 
-            setPadding(mLineNumberWidth+20, 0, 0, 0);
             //设置行号显示部分的宽度
-            mNumberBarWidth=mLineNumberWidth+12;
+            mNumberBarWidth = mLineNumberWidth + 12;
         }
 
 
@@ -194,22 +212,31 @@ public class HighlightView extends AppCompatEditText{
     public boolean onTouchEvent(@NonNull MotionEvent ev) {
         super.onTouchEvent(ev);
         //设置文本缩放
-        mScaleDetector.onTouchEvent(ev);
+        if (mZoom) {
+            mScaleDetector.onTouchEvent(ev);
+        }
+
         return true;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         int baseline = getBaseline();
+        Log.e("getX",""+getX());
+        Log.e("getScrollX",""+getScrollX());
+        Log.e("getTranslationX",""+getTranslationX());
 
-        if (mShowLineNumber){
+
+        if (mShowLineNumber) {
             //画行号的背景
-            canvas.drawRect(0, 0, mNumberBarWidth, getLineHeight() * getLineCount(), mPaint);
+            canvas.drawRect(getScrollX(), 0, getScrollX()+mNumberBarWidth, getLineHeight() * getLineCount(), mPaint);
             //绘制行号数
             for (int i = 1; i <= getLineCount(); i++) {
-                canvas.drawText(Integer.toString(i), 5, baseline, getPaint());
+                canvas.drawText(Integer.toString(i), 5+getScrollX(), baseline, mNumberPaint);
                 baseline += getLineHeight();
             }
+
+            canvas.translate(mLineNumberWidth + 16, 0);
         }
         super.onDraw(canvas);
 
