@@ -135,11 +135,7 @@ public class HighlightView extends AppCompatEditText {
         }
 
         setHorizontallyScrolling(!mWrapping);
-
-
-        if (!mEditable) {
-            setFocusable(false);
-        }
+        setFocusable(mEditable);
 
     }
 
@@ -194,7 +190,7 @@ public class HighlightView extends AppCompatEditText {
                     Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         }
 
-        if (mWrapping&&mShowLineNumber) {
+        if (mWrapping && mShowLineNumber) {
             mLineNumberWidth = (int) getPaint().measureText(Integer.toString(MAX_LINES));
             //设置行号显示部分的宽度
             mNumberBarWidth = mLineNumberWidth + NUMBER_OFFSET * 2;
@@ -213,7 +209,7 @@ public class HighlightView extends AppCompatEditText {
     public boolean onTouchEvent(@NonNull MotionEvent ev) {
         super.onTouchEvent(ev);
         //设置文本缩放
-        if (mZoom&&!mWrapping) {
+        if (mZoom && !mWrapping) {
             mScaleDetector.onTouchEvent(ev);
         }
 
@@ -224,12 +220,8 @@ public class HighlightView extends AppCompatEditText {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        //计算最大行号的宽度
-        /*String strCount = String.valueOf(getLineCount());
-        Log.e("getLineCount", strCount);
-        mLineNumberWidth = (int) getPaint().measureText(strCount);*/
-        if (!mWrapping){
-
+        if (!mWrapping) {
+            //计算最大行号的宽度
             mLineNumberWidth = (int) getPaint().measureText(Integer.toString(getLineCount()));
             //设置行号显示部分的宽度
             mNumberBarWidth = mLineNumberWidth + NUMBER_OFFSET * 2;
@@ -256,18 +248,18 @@ public class HighlightView extends AppCompatEditText {
                 }
 
                 //方法1： 使用canvas.save()和canvas.restore()
-            /*canvas.save();
-            canvas.translate(mNumberBarWidth + 5, 0);
-            getPaint().setColor(color);
-            super.onDraw(canvas);
-            canvas.restore();*/
+                /*canvas.save();
+                canvas.translate(mNumberBarWidth + 5, 0);
+                getPaint().setColor(color);
+                super.onDraw(canvas);
+                canvas.restore();*/
 
                 //方法2： 使用canvas.translate
                 canvas.translate(mNumberBarWidth + 5, 0);
                 getPaint().setColor(color);
                 super.onDraw(canvas);
                 canvas.translate(-mNumberBarWidth + 5, 0);
-            }else {
+            } else {
                 super.onDraw(canvas);
             }
 
