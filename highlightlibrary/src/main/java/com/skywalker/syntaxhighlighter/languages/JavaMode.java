@@ -1,8 +1,8 @@
 package com.skywalker.syntaxhighlighter.languages;
 
+import com.skywalker.syntaxhighlighter.languages.common.CommonMode;
 import com.skywalker.syntaxhighlighter.languages.common.Mode;
 import com.skywalker.syntaxhighlighter.languages.common.RegExpRule;
-import com.skywalker.syntaxhighlighter.languages.common.RegexPairRule;
 
 import java.util.regex.Pattern;
 
@@ -35,10 +35,10 @@ public class JavaMode extends Mode {
         mRegExpRuleList.add(new RegExpRule(Mode.KEY_CONSTANT, Pattern.compile(constant)));
         mRegExpRuleList.add(new RegExpRule(Mode.KEY_NUMBER, Pattern.compile(number)));
 
-        mRegexPairList.add(new RegexPairRule(Mode.KEY_STRING, Pattern.compile("\""), Pattern.compile("\"")));
-        mRegexPairList.add(new RegexPairRule(Mode.KEY_STRING, Pattern.compile("'"), Pattern.compile("'")));
-        mRegexPairList.add(new RegexPairRule(Mode.KEY_COMMENT, Pattern.compile("//"), Pattern.compile("$", Pattern.MULTILINE)));
-        mRegexPairList.add(new RegexPairRule(Mode.KEY_COMMENT, Pattern.compile("/\\*"), Pattern.compile("\\*/")));
+        mRegexPairList.add(CommonMode.QUOTE_STRING_RULE);
+        mRegexPairList.add(CommonMode.APOS_STRING_RULE);
+        mRegexPairList.add(CommonMode.C_LINE_COMMENT_RULE);
+        mRegexPairList.add(CommonMode.C_BLOCK_COMMENT_RULE);
 
         mToken=combinePatterns("\"","'","//","/\\*");
 

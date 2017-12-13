@@ -17,6 +17,7 @@ public abstract class Mode {
     public static final int KEY_NUMBER = 14;
     public static final int KEY_STATEMENT = 15;
     public static final int KEY_CONSTANT = 16;
+    public static final int KEY_SYMBOL = 17;
 
     protected String mToken;
     protected String mSymbol;

@@ -34,9 +34,8 @@ public class Parser {
                         System.out.println(pair.getKey());
                         result.setEnd(scanner.match().end() + scanner.getBase());
                         mMatchResults.add(result);
-                        break;
                     }
-
+                    break;
                 }
             }
         }
@@ -54,9 +53,16 @@ public class Parser {
                     index = r.getEnd() + 1;
                     continue;
                 }
+                try {
+                    substring = content.substring(index, r.getStart());
+                    index = r.getEnd() + 1;
 
-                substring = content.substring(index, r.getStart());
-                index = r.getEnd() + 1;
+                }catch (Exception e){
+                    int a=index;
+                    int b=r.getStart();
+                    substring="";
+                }
+
             }
 
             for (RegExpRule rule : mLanguage.getRegExpRuleList()) {

@@ -6,9 +6,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -16,10 +18,14 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
+import com.skywalker.syntaxhighlighter.languages.JavaScriptMode;
 import com.skywalker.syntaxhighlighter.languages.common.Mode;
 import com.skywalker.syntaxhighlighter.languages.common.RegexMatchResult;
 import com.skywalker.syntaxhighlighter.themes.DefaultTheme;
 import com.skywalker.syntaxhighlighter.themes.Theme;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*******************************
  * Created by liuqiang          *
@@ -27,15 +33,14 @@ import com.skywalker.syntaxhighlighter.themes.Theme;
  * data: 2017/11/20               *
  *******************************/
 
-public class HighlightView extends AppCompatEditText {
+public class HighlightView1 extends AppCompatEditText {
 
     private String mContent;
     private SpannableStringBuilder mBuilder;
 
     private static final String TAG = "HighlightView";
-    private static final int MAX_LINES=9999;
     private ScaleGestureDetector mScaleDetector;
-    private static final int NUMBER_OFFSER = 5;
+
     private float mScaleFactor = 1.f;
     private float defaultSize;
 
@@ -47,11 +52,13 @@ public class HighlightView extends AppCompatEditText {
     private float mZoomUpperLimit;
     private float mZoomLowerLimit;
     private Theme mTheme;
+    private List<Integer> mIndexs;
 
     private Paint mPaint;
+    private Paint mNumberPaint;
     private int mLineNumberWidth;
     private int mNumberBarWidth;
-
+    private int left=0;
     public static class Builder {
 
         private boolean mShowLineNumber = false;
@@ -101,18 +108,20 @@ public class HighlightView extends AppCompatEditText {
 
     }
 
-    public HighlightView(Context context) {
+    public HighlightView1(Context context) {
         this(context, null);
     }
 
-    public HighlightView(Context context, AttributeSet attrs) {
+    public HighlightView1(Context context, AttributeSet attrs) {
         this(context, attrs, android.R.attr.textStyle);
     }
 
-    public HighlightView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public HighlightView1(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setPadding(5, 5, 5, 10);
         Typeface face = Typeface.createFromAsset(context.getAssets(), "SourceCodePro-Regular.otf");
         setTypeface(face);
+        TextViewCompat.setAutoSizeTextTypeWithDefaults(this, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
     }
 
     private void initialize() {
@@ -121,15 +130,32 @@ public class HighlightView extends AppCompatEditText {
             mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
         }
 
+        mPaint = new Paint();
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setColor(Color.GRAY);
+        mPaint.setStrokeWidth(10);
+
         if (mShowLineNumber) {
-            mPaint = new Paint();
-            mPaint.setStyle(Paint.Style.FILL);
-            mPaint.setColor(Color.GRAY);
-            mPaint.setStrokeWidth(10);
+
+            mNumberPaint = new Paint();
+            mNumberPaint.setStyle(Paint.Style.FILL);
+            mNumberPaint.setColor(Color.WHITE);
+            mNumberPaint.setStrokeWidth(getPaint().getStrokeWidth());
+            mNumberPaint.setTextSize(getPaint().getTextSize());
         }
 
-        setHorizontallyScrolling(!mWrapping);
+        if (mWrapping) {
+            mIndexs = new ArrayList<>();
+            char key = '\n';
+            for (Integer index = mContent.indexOf(key);
+                 index >= 0;
+                 index = mContent.indexOf(key, index + 1)) {
+                mIndexs.add(index);
+            }
+        } else {
 
+            //setHorizontallyScrolling(true);
+        }
 
         if (!mEditable) {
             setFocusable(false);
@@ -152,12 +178,27 @@ public class HighlightView extends AppCompatEditText {
 
     public void setContent(String content) {
         this.mContent = content.replaceAll("\r", "");
+        ;
 
         mBuilder = new SpannableStringBuilder(content);
 
     }
 
-    public void render(Mode mode) {
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        String strCount = String.valueOf(getLineCount());
+        Log.e("getLineCount", strCount);
+        //计算最大行号的宽度
+        mLineNumberWidth = (int) getPaint().measureText(strCount);
+        //设置行号显示部分的宽度
+        mNumberBarWidth = mLineNumberWidth + 12;
+        Log.e("mNumberBarWidth", "" + mNumberBarWidth);
+
+    }
+
+    public void render() {
         if (mTheme == null) {
             mTheme = new DefaultTheme(getContext());
         }
@@ -167,9 +208,10 @@ public class HighlightView extends AppCompatEditText {
 
         setBackgroundColor(mTheme.getColor(Mode.KEY_BACKGROUND));
         setTextColor(mTheme.getColor(Mode.KEY_TEXT));
-        Parser parser = new Parser(mode);
+        Parser parser = new Parser(new JavaScriptMode());
         parser.parse(mContent);
         for (RegexMatchResult result : parser.getMatchResults()) {
+
             mBuilder.setSpan(new ForegroundColorSpan(
                             mTheme.getColor(result.getKey())),
                     result.getStart(),
@@ -177,8 +219,19 @@ public class HighlightView extends AppCompatEditText {
                     Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         }
 
+        if (mWrapping) {
+            int startIndex = 0;
+            int w =(int)getPaint().measureText("9999");
+            for (int i = 0; i < mIndexs.size(); i++) {
+                mBuilder.setSpan(new NumberSpan(w, i, Color.RED), startIndex, mIndexs.get(i), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                startIndex = mIndexs.get(i) + 1;
+            }
+        }
 
         setText(mBuilder);
+
+
+
     }
 
 
@@ -194,56 +247,21 @@ public class HighlightView extends AppCompatEditText {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-
-        String strCount = String.valueOf(getLineCount());
-        Log.e("getLineCount",strCount);
-        //计算最大行号的宽度
-        mLineNumberWidth = (int) getPaint().measureText(strCount);
-
-        //设置行号显示部分的宽度
-        mNumberBarWidth = mLineNumberWidth + NUMBER_OFFSER*2;
-    }
-
-    @Override
     protected void onDraw(Canvas canvas) {
         int baseline = getBaseline();
         Log.e("getX", "" + getX());
         Log.e("getScrollX", "" + getScrollX());
         Log.e("getTranslationX", "" + getTranslationX());
 
+        //setPadding(mLineNumberWidth + 16,0,10,0);
+
         if (mShowLineNumber) {
-            int color = getPaint().getColor();
-            getPaint().setColor(Color.WHITE);
             //画行号的背景
-            canvas.drawRect(getScaleX(), 0, mNumberBarWidth + getScrollX(), getLineHeight() * getLineCount(), mPaint);
+            canvas.drawRect(0, 0, mNumberBarWidth, getLineHeight() * getLineCount(), mPaint);
 
-            //绘制行号数
-            for (int i = 1; i <= getLineCount(); i++) {
-                canvas.drawText(Integer.toString(i), NUMBER_OFFSER + getScrollX(), baseline, getPaint());
-                baseline += getLineHeight();
-            }
-
-            //方法1： 使用canvas.save()和canvas.restore()
-            /*canvas.save();
-            canvas.translate(mNumberBarWidth + 5, 0);
-            getPaint().setColor(color);
-            super.onDraw(canvas);
-            canvas.restore();*/
-
-            //方法2： 使用canvas.translate
-            canvas.translate(mNumberBarWidth + 5, 0);
-            getPaint().setColor(color);
-            super.onDraw(canvas);
-            canvas.translate(-mNumberBarWidth + 5, 0);
-
-        } else {
-            super.onDraw(canvas);
         }
 
-
+        super.onDraw(canvas);
     }
 
     /*Scale Gesture listener class,

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preset_sizes">
+        <item>12sp</item>
+        <item>24sp</item>
+        <item>36sp</item>
+        <item>48sp</item>
+        <item>60sp</item>
+        <item>72sp</item>
+        <item>84sp</item>
+    </array>
+</resources>

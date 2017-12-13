@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 public class RegexPairRule {
     private Pattern mStart;
     private Pattern mEnd;
+    private Pattern mSkip;
     private Integer mKey;
 
     public RegexPairRule(Integer key, Pattern start, Pattern end) {
@@ -23,5 +24,9 @@ public class RegexPairRule {
 
     public Pattern getEnd() {
         return mEnd;
+    }
+
+    public Pattern getSkip() {
+        return mSkip;
     }
 }

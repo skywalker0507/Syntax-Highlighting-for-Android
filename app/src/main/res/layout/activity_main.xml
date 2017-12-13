@@ -29,6 +29,7 @@
             android:layout_height="wrap_content"
             android:text="自动换行"/>
         <Button
+            android:id="@+id/button_render"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="重新加载"/>
