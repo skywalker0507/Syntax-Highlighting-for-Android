@@ -23,7 +23,7 @@ public class Activity3 extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity3);
-        HighlightView mHighlightView=findViewById(R.id.highlightView);
+        HighlightView mHighlightView = findViewById(R.id.highlightView);
 
         String file = "ChartComputator.java";
         //String file="highlight.js";
@@ -39,7 +39,7 @@ public class Activity3 extends AppCompatActivity {
             HighlightView.Builder builder = new HighlightView.Builder()
                     .enableEdit(false)
                     .setTheme(new DefaultTheme(this))
-                    .showLineNumber(true)
+                    .showLineNumber(false)
                     .enableZoom(true)
                     .textWrapping(false);
             mHighlightView.setHighlightBuilder(builder);
@@ -48,8 +48,9 @@ public class Activity3 extends AppCompatActivity {
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
 
 
     }

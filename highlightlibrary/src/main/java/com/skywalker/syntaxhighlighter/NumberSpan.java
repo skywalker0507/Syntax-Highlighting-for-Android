@@ -15,6 +15,7 @@ import android.text.style.LeadingMarginSpan;
 
 public class NumberSpan implements LeadingMarginSpan {
 
+    private static final int NUMBER_OFFSET = 5;
     private final int mColor;
     //private int mOffset;
     private int i = 1;
@@ -28,7 +29,7 @@ public class NumberSpan implements LeadingMarginSpan {
     }
 
     public int getLeadingMargin(boolean first) {
-        return mBar;
+        return mBar+4;
     }
 
     public void drawLeadingMargin(Canvas c, Paint p, int x, int dir,
@@ -39,7 +40,7 @@ public class NumberSpan implements LeadingMarginSpan {
             int color = p.getColor();
             p.setColor(mColor);
             p.setStyle(Paint.Style.FILL);
-            c.drawText(Integer.toString(i), 6+x, baseline, p);
+            c.drawText(Integer.toString(i), NUMBER_OFFSET+x, baseline, p);
             p.setColor(color);
         }
     }
