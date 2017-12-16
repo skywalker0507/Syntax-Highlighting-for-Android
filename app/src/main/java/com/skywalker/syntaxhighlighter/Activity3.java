@@ -26,9 +26,9 @@ public class Activity3 extends AppCompatActivity {
         setContentView(R.layout.activity3);
         HighlightView mHighlightView = findViewById(R.id.highlightView);
 
-        //String file = "ChartComputator.java";
+        String file = "ChartComputator.java";
         //String file = "highlight.js";
-        String file="ffmpeg.c";
+        //String file="ffmpeg.c";
         try {
             InputStream inputStream = getAssets().open(file);
             byte[] buffer = new byte[inputStream.available()];

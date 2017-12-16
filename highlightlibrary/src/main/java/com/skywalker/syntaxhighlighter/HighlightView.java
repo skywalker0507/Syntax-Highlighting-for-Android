@@ -40,6 +40,7 @@ public class HighlightView extends AppCompatEditText {
     private static final int MAX_LINES = 9999;
     private ScaleGestureDetector mScaleDetector;
     private static final int NUMBER_OFFSET = 5;
+    private static final int PADDING_RIGHT=10;
     private float mScaleFactor = 1.f;
     private float defaultSize;
 
@@ -112,13 +113,14 @@ public class HighlightView extends AppCompatEditText {
     }
 
     public HighlightView(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.textStyle);
+        this(context, attrs, 0);
     }
 
     public HighlightView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         Typeface face = Typeface.createFromAsset(context.getAssets(), "SourceCodePro-Regular.otf");
         setTypeface(face);
+        setTextIsSelectable(true);
     }
 
     private void initialize() {
@@ -130,12 +132,15 @@ public class HighlightView extends AppCompatEditText {
         if (mShowLineNumber) {
             mPaint = new Paint();
             mPaint.setStyle(Paint.Style.FILL);
-            mPaint.setColor(Color.GRAY);
+            mPaint.setColor(mTheme.getColor(Mode.KEY_LINE_BAR));
             mPaint.setStrokeWidth(10);
         }
 
         setHorizontallyScrolling(!mWrapping);
+
         setFocusable(mEditable);
+        setFocusableInTouchMode(mEditable);
+
 
     }
 
@@ -152,8 +157,8 @@ public class HighlightView extends AppCompatEditText {
 
     }
 
-    public void setContent(String content) throws Exception {
-        this.mContent = content.replaceAll("\r", "");
+    public void setContent(String content) {
+        this.mContent = content.replaceAll("\r\n", "\n");
         mIndexs = new ArrayList<>();
         char key = '\n';
         for (Integer index = mContent.indexOf(key);
@@ -162,11 +167,11 @@ public class HighlightView extends AppCompatEditText {
             mIndexs.add(index);
         }
 
-        if (mIndexs.size() > MAX_LINES) {
+        /*if (mIndexs.size() > MAX_LINES) {
             throw new Exception("文本超过最大支持长度");
-        }
+        }*/
 
-        mBuilder = new SpannableStringBuilder(content);
+        mBuilder = new SpannableStringBuilder(mContent);
 
     }
 
@@ -196,7 +201,7 @@ public class HighlightView extends AppCompatEditText {
             mNumberBarWidth = mLineNumberWidth + NUMBER_OFFSET * 2;
             int startIndex = 0;
             for (int i = 0; i < mIndexs.size(); i++) {
-                mBuilder.setSpan(new NumberSpan(mNumberBarWidth, i, Color.RED), startIndex, mIndexs.get(i), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                mBuilder.setSpan(new NumberSpan(mNumberBarWidth, i, mTheme.getColor(Mode.KEY_LINE_NUMBER)), startIndex, mIndexs.get(i), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 startIndex = mIndexs.get(i) + 1;
             }
         }
@@ -225,6 +230,7 @@ public class HighlightView extends AppCompatEditText {
             mLineNumberWidth = (int) getPaint().measureText(Integer.toString(getLineCount()));
             //设置行号显示部分的宽度
             mNumberBarWidth = mLineNumberWidth + NUMBER_OFFSET * 2;
+            setPadding(0,0,mNumberBarWidth+PADDING_RIGHT,0);
         }
 
     }

@@ -1,6 +1,8 @@
 package com.skywalker.syntaxhighlighter;
 
 
+import android.util.Log;
+
 import com.skywalker.syntaxhighlighter.languages.common.Mode;
 import com.skywalker.syntaxhighlighter.languages.common.RegExpRule;
 import com.skywalker.syntaxhighlighter.languages.common.RegexMatchResult;
@@ -20,7 +22,7 @@ public class Parser {
         this.mLanguage = language;
     }
 
-    public void parse(String content){
+    public void parse(String content) {
 
         long startTime = System.currentTimeMillis();
         SyntaxScanner scanner = new SyntaxScanner(content);
@@ -30,11 +32,30 @@ public class Parser {
                     RegexPairRule pair = mLanguage.getRegexPairList().get(i - 1);
                     RegexMatchResult result = new RegexMatchResult(pair.getKey());
                     result.setStart(scanner.match().start() + scanner.getBase());
-                    if (scanner.findWithinHorizon(pair.getEnd(), 0) != null) {
+                    if (pair.getSkip() != null) {
+                        while (scanner.findWithinHorizon(pair.getEndPattern(), 0) != null) {
+                            if (scanner.match().start(2) != -1) {
+                                result.setEnd(scanner.match().end(2) + scanner.getBase());
+                                mMatchResults.add(result);
+                                break;
+                            } /*else if (scanner.match().start(1) != -1) {
+                                //skip
+                            }*/
+                        }
+                    } else {
+                        if (scanner.findWithinHorizon(pair.getEndPattern(), 0) != null) {
+                            System.out.println(pair.getKey());
+                            result.setEnd(scanner.match().end() + scanner.getBase());
+                            mMatchResults.add(result);
+                        }
+                    }
+
+
+                    /*if (scanner.findWithinHorizon(pair.getEndPattern(), 0) != null) {
                         System.out.println(pair.getKey());
                         result.setEnd(scanner.match().end() + scanner.getBase());
                         mMatchResults.add(result);
-                    }
+                    }*/
                     break;
                 }
             }
@@ -50,18 +71,12 @@ public class Parser {
             } else {
                 RegexMatchResult r = mMatchResults.get(i);
                 if (r.getStart() == index) {
-                    index = r.getEnd() + 1;
+                    index = r.getEnd();
                     continue;
                 }
-                try {
-                    substring = content.substring(index, r.getStart());
-                    index = r.getEnd() + 1;
 
-                }catch (Exception e){
-                    int a=index;
-                    int b=r.getStart();
-                    substring="";
-                }
+                substring = content.substring(index, r.getStart());
+                index = r.getEnd();
 
             }
 
@@ -83,7 +98,7 @@ public class Parser {
         System.out.println(list.size());
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
-        System.out.println("totalTime " + totalTime);
+        Log.e("totalTime " ,""+ totalTime);
 
     }
 

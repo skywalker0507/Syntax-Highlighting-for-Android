@@ -16,6 +16,8 @@ public class DefaultTheme extends Theme {
 
     public DefaultTheme(Context context) {
 
+        mColors.put(Mode.KEY_LINE_NUMBER,ContextCompat.getColor(context, R.color.default_line_number));
+        mColors.put(Mode.KEY_LINE_BAR,ContextCompat.getColor(context,R.color.default_line_bar));
         mColors.put(Mode.KEY_TEXT, ContextCompat.getColor(context, R.color.default_text));
         mColors.put(Mode.KEY_BACKGROUND, ContextCompat.getColor(context, R.color.default_background));
         mColors.put(Mode.KEY_COMMENT, ContextCompat.getColor(context, R.color.default_comment));
@@ -24,5 +26,6 @@ public class DefaultTheme extends Theme {
         mColors.put(Mode.KEY_STATEMENT, ContextCompat.getColor(context, R.color.default_statement));
         mColors.put(Mode.KEY_STRING, ContextCompat.getColor(context, R.color.default_string));
         mColors.put(Mode.KEY_TYPE, ContextCompat.getColor(context, R.color.default_type));
+        mColors.put(Mode.KEY_PREPROC,ContextCompat.getColor(context, R.color.default_preproc));
     }
 }
