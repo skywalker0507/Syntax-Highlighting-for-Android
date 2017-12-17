@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="HighlightView">
-        <attr name="textStyle" >
-            <flag name="normal" value="0" />
-            <flag name="bold" value="1" />
-            <flag name="italic" value="2" />
-        </attr>
-
-        <attr name="editTextStyle" format="reference" />
+       <attr name="showLineNumber" format="boolean"/>
+        <attr name="zoom" format="boolean"/>
+        <attr name="wrapping" format="boolean"/>
+        <attr name="editable" format="boolean"/>
+        <attr name="zoomUpperLimit" format="float"/>
+        <attr name="zoomLowerLimit" format="float"/>
     </declare-styleable>
 
 </resources>

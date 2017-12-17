@@ -1,6 +1,7 @@
 package com.skywalker.syntaxhighlighter;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -22,6 +23,8 @@ import com.skywalker.syntaxhighlighter.languages.common.RegexMatchResult;
 import com.skywalker.syntaxhighlighter.themes.DefaultTheme;
 import com.skywalker.syntaxhighlighter.themes.Theme;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,11 +43,11 @@ public class HighlightView extends AppCompatEditText {
     private static final int MAX_LINES = 9999;
     private ScaleGestureDetector mScaleDetector;
     private static final int NUMBER_OFFSET = 5;
-    private static final int PADDING_RIGHT=10;
+    private static final int PADDING_RIGHT = 10;
     private float mScaleFactor = 1.f;
-    private float defaultSize;
+    private float mDefaultTextSize;
 
-    private float zoomLimit = 3.0f;
+
     private boolean mShowLineNumber;
     private boolean mWrapping;
     private boolean mZoom;
@@ -61,9 +64,9 @@ public class HighlightView extends AppCompatEditText {
 
     public static class Builder {
 
-        private boolean mShowLineNumber = false;
+        private boolean mShowLineNumber = true;
         private boolean mWrapping = false;
-        private boolean mZoom = false;
+        private boolean mZoom = true;
         private boolean mEditable = false;
         private Theme mTheme;
 
@@ -118,13 +121,47 @@ public class HighlightView extends AppCompatEditText {
 
     public HighlightView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.HighlightView,
+                0, 0);
+
+        try {
+            mEditable = a.getBoolean(R.styleable.HighlightView_editable, false);
+            mShowLineNumber = a.getBoolean(R.styleable.HighlightView_showLineNumber, true);
+            mWrapping = a.getBoolean(R.styleable.HighlightView_wrapping, false);
+            mZoom = a.getBoolean(R.styleable.HighlightView_zoom, true);
+            mZoomUpperLimit = a.getFloat(R.styleable.HighlightView_zoomUpperLimit, 3);
+            mZoomLowerLimit = a.getFloat(R.styleable.HighlightView_zoomLowerLimit, 1);
+
+        } finally {
+            a.recycle();
+        }
+
         Typeface face = Typeface.createFromAsset(context.getAssets(), "SourceCodePro-Regular.otf");
         setTypeface(face);
         setTextIsSelectable(true);
+
+        initialize();
+
     }
 
+    public void setHighlightBuilder(Builder builder) {
+        this.mTheme = builder.mTheme;
+        this.mEditable = builder.mEditable;
+        this.mShowLineNumber = builder.mShowLineNumber;
+        this.mZoomUpperLimit = builder.mZoomUpperLimit;
+        this.mZoomLowerLimit = builder.mZoomLowerLimit;
+        this.mWrapping = builder.mWrapping;
+        this.mZoom = builder.mZoom;
+
+        initialize();
+
+    }
+
+
     private void initialize() {
-        defaultSize = getTextSize();
+        mDefaultTextSize = getTextSize();
         if (mZoom) {
             mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
         }
@@ -144,16 +181,12 @@ public class HighlightView extends AppCompatEditText {
 
     }
 
-    public void setHighlightBuilder(Builder builder) {
-        this.mTheme = builder.mTheme;
-        this.mEditable = builder.mEditable;
-        this.mShowLineNumber = builder.mShowLineNumber;
-        this.mZoomUpperLimit = builder.mZoomUpperLimit;
-        this.mZoomLowerLimit = builder.mZoomLowerLimit;
-        this.mWrapping = builder.mWrapping;
-        this.mZoom = builder.mZoom;
-
-        initialize();
+    public void setContent(InputStream inputStream) throws IOException {
+        byte[] buffer = new byte[inputStream.available()];
+        inputStream.read(buffer);
+        inputStream.close();
+        String t = new String(buffer);
+        setContent(t);
 
     }
 
@@ -173,6 +206,11 @@ public class HighlightView extends AppCompatEditText {
 
         mBuilder = new SpannableStringBuilder(mContent);
 
+    }
+
+    public void render(Theme theme, Mode mode) {
+        this.mTheme = theme;
+        render(mode);
     }
 
     public void render(Mode mode) {
@@ -201,7 +239,7 @@ public class HighlightView extends AppCompatEditText {
             mNumberBarWidth = mLineNumberWidth + NUMBER_OFFSET * 2;
             int startIndex = 0;
             for (int i = 0; i < mIndexs.size(); i++) {
-                mBuilder.setSpan(new NumberSpan(mNumberBarWidth, i, mTheme.getColor(Mode.KEY_LINE_NUMBER)), startIndex, mIndexs.get(i), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                mBuilder.setSpan(new NumberSpan(mNumberBarWidth, i + 1, mTheme.getColor(Mode.KEY_LINE_NUMBER)), startIndex, mIndexs.get(i), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 startIndex = mIndexs.get(i) + 1;
             }
         }
@@ -230,7 +268,7 @@ public class HighlightView extends AppCompatEditText {
             mLineNumberWidth = (int) getPaint().measureText(Integer.toString(getLineCount()));
             //设置行号显示部分的宽度
             mNumberBarWidth = mLineNumberWidth + NUMBER_OFFSET * 2;
-            setPadding(0,0,mNumberBarWidth+PADDING_RIGHT,0);
+            setPadding(0, 0, mNumberBarWidth + PADDING_RIGHT, 0);
         }
 
     }
@@ -277,18 +315,13 @@ public class HighlightView extends AppCompatEditText {
 
     }
 
-    /*Scale Gesture listener class,
-    mScaleFactor is getting the scaling value
-    and mScaleFactor is mapped between 1.0 and and zoomLimit
-    that is 3.0 by default. You can also change it. 3.0 means text
-    can zoom to 3 times the default value.*/
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            mScaleFactor *= detector.getScaleFactor();
-            mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, zoomLimit));
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, defaultSize * mScaleFactor);
+            mScaleFactor = detector.getScaleFactor();
+            mScaleFactor = Math.max(0, Math.min(mScaleFactor, mZoomUpperLimit));
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, mDefaultTextSize * mScaleFactor);
             Log.e(TAG, String.valueOf(mScaleFactor));
             return true;
         }

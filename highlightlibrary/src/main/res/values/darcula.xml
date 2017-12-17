@@ -2,7 +2,6 @@
 <resources>
     <color name="darcula_text">#CCCCCC</color>
     <color name="darcula_background">#242424</color>
-
     <color name="darcula_string">#6A8759</color>
     <color name="darcula_comment">#707070</color>
     <color name="darcula_type">#CC8242</color>

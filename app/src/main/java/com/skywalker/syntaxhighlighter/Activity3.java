@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 
 import com.skywalker.syntaxhighlighter.languages.CMode;
 import com.skywalker.syntaxhighlighter.themes.DefaultTheme;
@@ -45,8 +44,6 @@ public class Activity3 extends AppCompatActivity {
                     .textWrapping(false);
             mHighlightView.setHighlightBuilder(builder);
             mHighlightView.render(new CMode());
-            int length=mHighlightView.getText().toString().length();
-            Log.e("length",""+length);
 
 
         } catch (IOException e) {
