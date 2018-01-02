@@ -14,9 +14,13 @@ public class JavaMode extends Mode {
     private final static String constant = "\\b(true|false|null)\\b";
 
 
+    @Override
+    public Pattern getExtension() {
+        return Pattern.compile("java");
+    }
 
-    public JavaMode() {
-
+    @Override
+    public void init() {
         mRegExpRuleList.add(new RegExpRule(Mode.KEY_TYPE, Pattern.compile(type1)));
         mRegExpRuleList.add(new RegExpRule(Mode.KEY_TYPE, Pattern.compile(type2)));
         mRegExpRuleList.add(new RegExpRule(Mode.KEY_STATEMENT, Pattern.compile(statement)));
@@ -27,13 +31,10 @@ public class JavaMode extends Mode {
         mRegexPairList.add(CommonRegexRule.APOS_STRING_RULE);
         mRegexPairList.add(CommonRegexRule.C_LINE_COMMENT_RULE);
         mRegexPairList.add(CommonRegexRule.C_BLOCK_COMMENT_RULE);
-
-        mToken= Utils.combinePatterns("\"","'","//","/\\*");
-
     }
 
     @Override
-    public Pattern getExtension() {
-        return Pattern.compile("java");
+    public void setToken() {
+        mToken = Utils.combinePatterns("\"", "'", "//", "/\\*");
     }
 }

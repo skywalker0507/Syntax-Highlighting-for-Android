@@ -16,8 +16,13 @@ import java.util.regex.Pattern;
 
 public class CMode extends Mode{
 
-    public CMode(){
+    @Override
+    public Pattern getExtension() {
+        return Pattern.compile("(c|h)");
+    }
 
+    @Override
+    public void init() {
         mRegExpRuleList.add(new RegExpRule(Mode.KEY_TYPE, Pattern.compile("\\b(bool|float|double|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|(un)?signed|inline)\\b")));
         mRegExpRuleList.add(new RegExpRule(Mode.KEY_TYPE,Pattern.compile("\\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\\b")));
         mRegExpRuleList.add(new RegExpRule(Mode.KEY_STATEMENT,Pattern.compile("\\b(typename|mutable|volatile|register|explicit)\\b")));
@@ -33,11 +38,11 @@ public class CMode extends Mode{
         mRegexPairList.add(CommonRegexRule.C_BLOCK_COMMENT_RULE);
         RegexPairRule pairRule=new RegexPairRule(Mode.KEY_PREPROC,Pattern.compile("#[\\p{javaWhitespace}]*"),Pattern.compile("(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"));
         mRegexPairList.add(pairRule);
-        mToken= Utils.combinePatterns("\"","'","//","/\\*","#");
+
     }
 
     @Override
-    public Pattern getExtension() {
-        return Pattern.compile("(c|h)");
+    public void setToken() {
+        mToken= Utils.combinePatterns("\"","'","//","/\\*","#");
     }
 }

@@ -24,9 +24,13 @@ public abstract class Mode {
 
     protected List<RegExpRule> mRegExpRuleList = new ArrayList<>();
     protected List<RegexPairRule> mRegexPairList = new ArrayList<>();
-
+    public Mode(){
+        init();
+        setToken();
+    }
     public  abstract Pattern getExtension();
-
+    public abstract void init();
+    public abstract void setToken();
     public Pattern getToken() {
         return Pattern.compile(mToken);
     }

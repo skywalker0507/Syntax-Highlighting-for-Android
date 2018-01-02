@@ -23,7 +23,6 @@ import com.skywalker.syntaxhighlighter.languages.common.RegexMatchResult;
 import com.skywalker.syntaxhighlighter.themes.DefaultTheme;
 import com.skywalker.syntaxhighlighter.themes.Theme;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +69,7 @@ public class HighlightView extends AppCompatEditText {
         private boolean mEditable = false;
         private Theme mTheme;
 
-        private float mZoomUpperLimit;
+        private float mZoomUpperLimit=6;
         private float mZoomLowerLimit;
 
         public Builder showLineNumber(boolean showLineNumber) {
@@ -142,8 +141,6 @@ public class HighlightView extends AppCompatEditText {
         setTypeface(face);
         setTextIsSelectable(true);
 
-        initialize();
-
     }
 
     public void setHighlightBuilder(Builder builder) {
@@ -181,7 +178,7 @@ public class HighlightView extends AppCompatEditText {
 
     }
 
-    public void setContent(InputStream inputStream) throws IOException {
+    public void setContent(InputStream inputStream) throws Exception {
         byte[] buffer = new byte[inputStream.available()];
         inputStream.read(buffer);
         inputStream.close();
@@ -190,7 +187,7 @@ public class HighlightView extends AppCompatEditText {
 
     }
 
-    public void setContent(String content) {
+    public void setContent(String content) throws Exception {
         this.mContent = content.replaceAll("\r\n", "\n");
         mIndexs = new ArrayList<>();
         char key = '\n';
@@ -200,12 +197,16 @@ public class HighlightView extends AppCompatEditText {
             mIndexs.add(index);
         }
 
-        /*if (mIndexs.size() > MAX_LINES) {
+        if (mIndexs.size() > MAX_LINES) {
             throw new Exception("文本超过最大支持长度");
-        }*/
+        }
 
         mBuilder = new SpannableStringBuilder(mContent);
 
+    }
+
+    public SpannableStringBuilder getSpannableString() {
+        return mBuilder;
     }
 
     public void render(Theme theme, Mode mode) {
