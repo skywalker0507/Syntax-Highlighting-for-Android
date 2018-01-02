@@ -11,6 +11,7 @@ import android.support.v7.widget.AppCompatEditText;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -46,7 +47,7 @@ public class HighlightView extends AppCompatEditText {
     private float mScaleFactor = 1.f;
     private float mDefaultTextSize;
 
-
+    private int mTransparentBackground;
     private boolean mShowLineNumber;
     private boolean mWrapping;
     private boolean mZoom;
@@ -59,7 +60,8 @@ public class HighlightView extends AppCompatEditText {
     private int mLineNumberWidth;
     private int mNumberBarWidth;
 
-    private List<Integer> mIndexs;
+    private List<Integer> mIndexs = new ArrayList<>();
+    private List<Integer> mSelectedList = new ArrayList<>();
 
     public static class Builder {
 
@@ -69,7 +71,7 @@ public class HighlightView extends AppCompatEditText {
         private boolean mEditable = false;
         private Theme mTheme;
 
-        private float mZoomUpperLimit=6;
+        private float mZoomUpperLimit = 6;
         private float mZoomLowerLimit;
 
         public Builder showLineNumber(boolean showLineNumber) {
@@ -189,7 +191,6 @@ public class HighlightView extends AppCompatEditText {
 
     public void setContent(String content) throws Exception {
         this.mContent = content.replaceAll("\r\n", "\n");
-        mIndexs = new ArrayList<>();
         char key = '\n';
         for (Integer index = mContent.indexOf(key);
              index >= 0;
@@ -205,9 +206,6 @@ public class HighlightView extends AppCompatEditText {
 
     }
 
-    public SpannableStringBuilder getSpannableString() {
-        return mBuilder;
-    }
 
     public void render(Theme theme, Mode mode) {
         this.mTheme = theme;
@@ -221,6 +219,7 @@ public class HighlightView extends AppCompatEditText {
         if (mContent == null) {
             throw new NullPointerException("文本内容为空");
         }
+        mTransparentBackground = Color.parseColor("#80282828");
 
         setBackgroundColor(mTheme.getColor(Mode.KEY_BACKGROUND));
         setTextColor(mTheme.getColor(Mode.KEY_TEXT));
@@ -250,14 +249,64 @@ public class HighlightView extends AppCompatEditText {
 
 
     @Override
-    public boolean onTouchEvent(@NonNull MotionEvent ev) {
-        super.onTouchEvent(ev);
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
+
         //设置文本缩放
         if (mZoom && !mWrapping) {
-            mScaleDetector.onTouchEvent(ev);
+            mScaleDetector.onTouchEvent(event);
         }
 
+        int action = event.getAction();
+
+        if (action == MotionEvent.ACTION_DOWN) {
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+
+            x -= getTotalPaddingLeft();
+            y -= getTotalPaddingTop();
+
+            if (x < mNumberBarWidth) {
+                int line = getLayout().getLineForVertical(y);
+                int off = getLayout().getOffsetForHorizontal(line, x);
+
+                Log.e("line", "" + line);
+                Log.e("off", "" + off);
+                int[] t = findLine(off);
+                if (mSelectedList.contains(t[0])) {
+                    mSelectedList.remove(Integer.valueOf(t[0]));
+                    BackgroundColorSpan span[] = getText().getSpans(t[0], t[1], BackgroundColorSpan.class);
+                    if (span.length > 0) {
+                        getText().removeSpan(span[0]);
+                    }
+                } else {
+                    mSelectedList.add(t[0]);
+                    getText().setSpan(new BackgroundColorSpan(Color.YELLOW), t[0], t[1], Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+                }
+            }
+
+
+        }
+        super.onTouchEvent(event);
         return true;
+    }
+
+    private int[] findLine(int offset) {
+        int[] result = new int[2];
+        for (int i = 0; i < mIndexs.size(); i++) {
+            if (mIndexs.get(i) >= offset) {
+                result[0] = mIndexs.get(i);
+                if (i == mIndexs.size() - 1) {
+                    result[1] = mBuilder.length();
+                } else {
+                    result[1] = mIndexs.get(i + 1);
+                }
+
+                break;
+
+            }
+        }
+        return result;
     }
 
     @Override
@@ -320,8 +369,8 @@ public class HighlightView extends AppCompatEditText {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            mScaleFactor = detector.getScaleFactor();
-            mScaleFactor = Math.max(0, Math.min(mScaleFactor, mZoomUpperLimit));
+            mScaleFactor *= detector.getScaleFactor();
+            mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, mZoomUpperLimit));
             setTextSize(TypedValue.COMPLEX_UNIT_PX, mDefaultTextSize * mScaleFactor);
             Log.e(TAG, String.valueOf(mScaleFactor));
             return true;

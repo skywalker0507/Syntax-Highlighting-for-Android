@@ -232,7 +232,7 @@ public class SelectMovementMethod extends ScrollingMovementMethod {
                                 MotionEvent event) {
         int action = event.getAction();
 
-        if (action == MotionEvent.ACTION_UP) {
+        if (action == MotionEvent.ACTION_DOWN) {
             int x = (int) event.getX();
             int y = (int) event.getY();
 
@@ -248,34 +248,27 @@ public class SelectMovementMethod extends ScrollingMovementMethod {
 
             Log.e("line", "" + line);
             Log.e("off", "" + off);
-            int start = 0;
-            int end = 0;
-            int color = 0;
-            if (mSelectedList.contains(off)) {
-                mSelectedList.remove(Integer.valueOf(off));
+            ClickableSpan[] links = buffer.getSpans(off, off, ClickableSpan.class);
+            if (links.length==0){
+                return true;
+            }
 
-                ClickableSpan[] links = buffer.getSpans(off, off, ClickableSpan.class);
-                if (links.length != 0) {
-                    color = mBackground;
-                    start = buffer.getSpanStart(links[0]);
-                    end = buffer.getSpanEnd(links[0]);
-
+            int start = buffer.getSpanStart(links[0]);
+            int end = buffer.getSpanEnd(links[0]);
+            if (mSelectedList.contains(start)) {
+                mSelectedList.remove(Integer.valueOf(start));
+                BackgroundColorSpan span[]=buffer.getSpans(start,end,BackgroundColorSpan.class);
+                if (span.length>0){
+                    buffer.removeSpan(span[0]);
                 }
 
             } else {
-                mSelectedList.add(off);
-                ClickableSpan[] links = buffer.getSpans(off, off, ClickableSpan.class);
-                if (links.length != 0) {
+                mSelectedList.add(start);
+                buffer.setSpan(new BackgroundColorSpan(Color.YELLOW), start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
-                    color = Color.YELLOW;
-                    start = buffer.getSpanStart(links[0]);
-                    end = buffer.getSpanEnd(links[0]);
-
-
-                }
             }
 
-            buffer.setSpan(new BackgroundColorSpan(color), start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
 
 
         }

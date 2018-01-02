@@ -3,7 +3,6 @@ package com.skywalker.syntaxhighlighter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.SpannableStringBuilder;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.BackgroundColorSpan;
 import android.util.Log;
@@ -11,7 +10,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.skywalker.syntaxhighlighter.languages.JavaMode;
-import com.skywalker.syntaxhighlighter.themes.DefaultTheme;
+import com.skywalker.syntaxhighlighter.themes.AtomDarkTheme;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,10 +39,10 @@ public class Activity3 extends AppCompatActivity {
 
             mHighlightView.setContent(new String(buffer));
             mHighlightView.setMovementMethod(ScrollingMovementMethod.getInstance());
-            mHighlightView.setMovementMethod(SelectMovementMethod.getInstance());
+            //mHighlightView.setMovementMethod(SelectMovementMethod.getInstance());
             HighlightView.Builder builder = new HighlightView.Builder()
                     .enableEdit(false)
-                    .setTheme(new DefaultTheme(this))
+                    .setTheme(new AtomDarkTheme(this))
                     .showLineNumber(true)
                     .enableZoom(true)
                     .textWrapping(false);
@@ -61,11 +60,11 @@ public class Activity3 extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               SpannableStringBuilder builder= mHighlightView.getSpannableString();
-                BackgroundColorSpan[] s= builder.getSpans(0,builder.length(), BackgroundColorSpan.class);
+                BackgroundColorSpan[] s= mHighlightView.getText().getSpans(0,mHighlightView.getText().length(), BackgroundColorSpan.class);
                 StringBuilder stringBuilder=new StringBuilder();
                 for (BackgroundColorSpan span:s){
-                    stringBuilder.append(builder.subSequence(builder.getSpanStart(span), builder.getSpanEnd(span)));
+
+                    stringBuilder.append(mHighlightView.getText().subSequence(mHighlightView.getText().getSpanStart(span), mHighlightView.getText().getSpanEnd(span)));
                 }
 
                 Log.e("copy",stringBuilder.toString());
