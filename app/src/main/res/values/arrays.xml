@@ -9,4 +9,14 @@
         <item>72sp</item>
         <item>84sp</item>
     </array>
+    <string-array name="languages">
+        <item>C</item>
+        <item>Java</item>
+        <item>JavaScript</item>
+    </string-array>
+
+    <string-array name="themes">
+        <item>Default</item>
+        <item>AtomDark</item>
+    </string-array>
 </resources>
