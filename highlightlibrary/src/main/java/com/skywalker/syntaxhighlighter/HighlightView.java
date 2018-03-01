@@ -11,7 +11,6 @@ import android.support.v7.widget.AppCompatEditText;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -37,7 +36,6 @@ import java.util.List;
 public class HighlightView extends AppCompatEditText {
 
     private String mContent;
-    private SpannableStringBuilder mBuilder;
 
     private static final String TAG = "HighlightView";
     private static final int MAX_LINES = 9999;
@@ -47,11 +45,11 @@ public class HighlightView extends AppCompatEditText {
     private float mScaleFactor = 1.f;
     private float mDefaultTextSize;
 
-    private int mTransparentBackground;
-    private boolean mShowLineNumber;
-    private boolean mWrapping;
-    private boolean mZoom;
-    private boolean mEditable;
+
+    private boolean mShowLineNumber=true;
+    private boolean mWrapping=false;
+    private boolean mZoom=true;
+    private boolean mEditable=false;
     private float mZoomUpperLimit;
     private float mZoomLowerLimit;
     private Theme mTheme;
@@ -62,55 +60,6 @@ public class HighlightView extends AppCompatEditText {
 
     private List<Integer> mIndexs = new ArrayList<>();
     private List<Integer> mSelectedList = new ArrayList<>();
-
-    public static class Builder {
-
-        private boolean mShowLineNumber = true;
-        private boolean mWrapping = false;
-        private boolean mZoom = true;
-        private boolean mEditable = false;
-        private Theme mTheme;
-
-        private float mZoomUpperLimit = 6;
-        private float mZoomLowerLimit;
-
-        public Builder showLineNumber(boolean showLineNumber) {
-            mShowLineNumber = showLineNumber;
-            return this;
-        }
-
-        public Builder setTheme(Theme theme) {
-            this.mTheme = theme;
-            return this;
-        }
-
-        public Builder textWrapping(boolean wrapping) {
-            this.mWrapping = wrapping;
-            return this;
-        }
-
-        public Builder enableZoom(boolean isEnable) {
-            this.mZoom = isEnable;
-            return this;
-        }
-
-        public Builder setZoomUpperLimit(float limit) {
-            this.mZoomUpperLimit = limit;
-            return this;
-        }
-
-        public Builder setZoomLowerLimit(float limit) {
-            this.mZoomLowerLimit = limit;
-            return this;
-        }
-
-        public Builder enableEdit(boolean isEnable) {
-            this.mEditable = isEnable;
-            return this;
-        }
-
-
-    }
 
     public HighlightView(Context context) {
         this(context, null);
@@ -143,42 +92,30 @@ public class HighlightView extends AppCompatEditText {
         setTypeface(face);
         setTextIsSelectable(true);
 
-    }
-
-    public void setHighlightBuilder(Builder builder) {
-        this.mTheme = builder.mTheme;
-        this.mEditable = builder.mEditable;
-        this.mShowLineNumber = builder.mShowLineNumber;
-        this.mZoomUpperLimit = builder.mZoomUpperLimit;
-        this.mZoomLowerLimit = builder.mZoomLowerLimit;
-        this.mWrapping = builder.mWrapping;
-        this.mZoom = builder.mZoom;
-
-        initialize();
-
-    }
-
-
-    private void initialize() {
         mDefaultTextSize = getTextSize();
-        if (mZoom) {
-            mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
-        }
-
-        if (mShowLineNumber) {
-            mPaint = new Paint();
-            mPaint.setStyle(Paint.Style.FILL);
-            mPaint.setColor(mTheme.getColor(Mode.KEY_LINE_BAR));
-            mPaint.setStrokeWidth(10);
-        }
-
-        setHorizontallyScrolling(!mWrapping);
-
-        setFocusable(mEditable);
-        setFocusableInTouchMode(mEditable);
-
 
     }
+
+    public void setTheme(Theme theme) {
+        mTheme = theme;
+    }
+
+    public void setEditable(boolean editable) {
+        mEditable = editable;
+    }
+
+    public void setShowLineNumber(boolean showLineNumber) {
+        mShowLineNumber = showLineNumber;
+    }
+
+    public void setWrapping(boolean wrapping) {
+        mWrapping = wrapping;
+    }
+
+    public void setZoom(boolean zoom) {
+        mZoom = zoom;
+    }
+
 
     public void setContent(InputStream inputStream) throws Exception {
         byte[] buffer = new byte[inputStream.available()];
@@ -192,6 +129,7 @@ public class HighlightView extends AppCompatEditText {
     public void setContent(String content) throws Exception {
         this.mContent = content.replaceAll("\r\n", "\n");
         char key = '\n';
+        mIndexs.clear();
         for (Integer index = mContent.indexOf(key);
              index >= 0;
              index = mContent.indexOf(key, index + 1)) {
@@ -202,7 +140,6 @@ public class HighlightView extends AppCompatEditText {
             throw new Exception("文本超过最大支持长度");
         }
 
-        mBuilder = new SpannableStringBuilder(mContent);
 
     }
 
@@ -219,14 +156,30 @@ public class HighlightView extends AppCompatEditText {
         if (mContent == null) {
             throw new NullPointerException("文本内容为空");
         }
-        mTransparentBackground = Color.parseColor("#80282828");
+
+        if (mZoom&&mScaleDetector==null) {
+            mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
+        }
+
+        if (mShowLineNumber&&mPaint==null) {
+            mPaint = new Paint();
+            mPaint.setStyle(Paint.Style.FILL);
+            mPaint.setColor(mTheme.getColor(Mode.KEY_LINE_BAR));
+            mPaint.setStrokeWidth(10);
+        }
+
+        setHorizontallyScrolling(!mWrapping);
+
+        setFocusable(mEditable);
+        setFocusableInTouchMode(mEditable);
 
         setBackgroundColor(mTheme.getColor(Mode.KEY_BACKGROUND));
         setTextColor(mTheme.getColor(Mode.KEY_TEXT));
         Parser parser = new Parser(mode);
         parser.parse(mContent);
+        SpannableStringBuilder builder=new SpannableStringBuilder(mContent);
         for (RegexMatchResult result : parser.getMatchResults()) {
-            mBuilder.setSpan(new ForegroundColorSpan(
+            builder.setSpan(new ForegroundColorSpan(
                             mTheme.getColor(result.getKey())),
                     result.getStart(),
                     result.getEnd(),
@@ -239,12 +192,12 @@ public class HighlightView extends AppCompatEditText {
             mNumberBarWidth = mLineNumberWidth + NUMBER_OFFSET * 2;
             int startIndex = 0;
             for (int i = 0; i < mIndexs.size(); i++) {
-                mBuilder.setSpan(new NumberSpan(mNumberBarWidth, i + 1, mTheme.getColor(Mode.KEY_LINE_NUMBER)), startIndex, mIndexs.get(i), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                builder.setSpan(new NumberSpan(mNumberBarWidth, i + 1, mTheme.getColor(Mode.KEY_LINE_NUMBER)), startIndex, mIndexs.get(i), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 startIndex = mIndexs.get(i) + 1;
             }
         }
 
-        setText(mBuilder);
+        setText(builder);
     }
 
 
@@ -256,7 +209,7 @@ public class HighlightView extends AppCompatEditText {
             mScaleDetector.onTouchEvent(event);
         }
 
-        int action = event.getAction();
+        /*int action = event.getAction();
 
         if (action == MotionEvent.ACTION_DOWN) {
             int x = (int) event.getX();
@@ -284,20 +237,20 @@ public class HighlightView extends AppCompatEditText {
 
                 }
             }
+        }*/
 
 
-        }
         super.onTouchEvent(event);
         return true;
     }
 
-    private int[] findLine(int offset) {
+    private int[] findLine(int offset,SpannableStringBuilder builder) {
         int[] result = new int[2];
         for (int i = 0; i < mIndexs.size(); i++) {
             if (mIndexs.get(i) >= offset) {
                 result[0] = mIndexs.get(i);
                 if (i == mIndexs.size() - 1) {
-                    result[1] = mBuilder.length();
+                    result[1] = builder.length();
                 } else {
                     result[1] = mIndexs.get(i + 1);
                 }
