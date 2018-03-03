@@ -1,4 +1,4 @@
-package com.skywalker.syntaxhighlighter;
+package com.skywalker.syntaxhighlighter.demo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +8,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 
+import com.skywalker.syntaxhighlighter.HighlightView;
 import com.skywalker.syntaxhighlighter.languages.CMode;
 import com.skywalker.syntaxhighlighter.languages.JavaMode;
 import com.skywalker.syntaxhighlighter.languages.JavaScriptMode;
