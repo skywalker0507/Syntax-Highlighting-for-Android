@@ -99,14 +99,9 @@ mHighlightView.render(new DefaultTheme(this), new JavaMode());
                } else {
                    super.onDraw(canvas);
                }
-   ```
-
-
            } else {
                super.onDraw(canvas);
            }
-
-
        }
    ```
 
