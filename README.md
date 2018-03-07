@@ -108,5 +108,3 @@ mHighlightView.render(new DefaultTheme(this), new JavaMode());
    先绘制行号部分的矩形背景条，`canvas.drawRect(getScaleX(), 0, mNumberBarWidth + getScrollX(), getLineHeight() * getLineCount(), mPaint);` `mNumberBarWidth` 为背景条宽度，`mNumberBarWidth + getScrollX()`为当单行显示时，左右滑动屏幕，背景条的位置也随之移动，使行号背景条部分能够一直显示在屏幕最左侧。然后将整个`canvas`向右平移，绘制代码文字部分，绘制完毕后，再将屏幕向左平移到原位置。
 
 3. 自动换行：自动换行功能主要通过`LeadingMarginSpan`。先计算代码片段的行数，然后为每一行通过`LeadingMarginSpan`设置缩进量。
-
-   ```
